@@ -1,1 +1,26 @@
+package model;
 
+public class Professor extends Pessoa {
+
+    private String especialidade;
+
+    public Professor(int id, String nome, String email, String cpf,
+                     String dataNascimento, String especialidade) {
+
+        super(id, nome, email, cpf, dataNascimento);
+        this.especialidade = especialidade;
+    }
+
+    public void lancarNota() {
+        System.out.println("Nota lançada.");
+    }
+
+    public void listarNotas() {
+        System.out.println("Listando notas...");
+    }
+
+    @Override
+    public void exibirDados() {
+        System.out.println("Professor: " + nome);
+    }
+}
