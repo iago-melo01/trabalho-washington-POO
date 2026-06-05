@@ -1,97 +1,119 @@
-import java.util.List;
-import java.util.Scanner;
+package model;
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class Curso extends ConteudoEducacional {
     private double valorMensal;
     private boolean ativo;
-    private List<Disciplina> disciplinas;
+    private final List<Disciplina> disciplinas;
 
-    public Curso(int id,String nome,int cargaHoraria,double valorMensal,boolean ativo,List<Disciplina> disciplinas){
-        super(id,nome,cargaHoraria);
+    public Curso(int id, String nome, int cargaHoraria, double valorMensal, boolean ativo) {
+        super(id, nome, cargaHoraria);
         this.valorMensal = valorMensal;
         this.ativo = ativo;
-        this.disciplinas = disciplinas;
+        this.disciplinas = new ArrayList<>();
     }
 
-    public void adicionarDisciplina(int id,String nome, int cargaHoraria, String descricao,boolean ativo){
-        Disciplina disciplinaNova = new Disciplina(id,nome,cargaHoraria,descricao,ativo); // cria um objeto da classe Disciplina
-        disciplinas.add(disciplinaNova); // adiciona na lista de disciplinas do objeto da classe Curso
+    public double getValorMensal() {
+        return valorMensal;
     }
 
-    public void listarDisciplinas(){
-        System.out.println("Lista todas as disciplinas...");
-        for (Disciplina disciplina: disciplinas){ // for que percorre toda a lista de disciplinas
-            System.out.println("Id: " + disciplina.getId());
-            System.out.println("Nome: " + disciplina.getNome());
-            System.out.println("Carga Horária: "+ disciplina.getCargaHoraria());
+    public void setValorMensal(double valorMensal) {
+        this.valorMensal = valorMensal;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void ativar() {
+        ativo = true;
+    }
+
+    public void desativar() {
+        ativo = false;
+    }
+
+    public List<Disciplina> getDisciplinas() {
+        return disciplinas;
+    }
+
+    public void adicionarDisciplina(int id, String nome, int cargaHoraria, String descricao, boolean ativo) {
+        disciplinas.add(new Disciplina(id, nome, cargaHoraria, descricao, ativo));
+    }
+
+    public void listarDisciplinas() {
+        if (disciplinas.isEmpty()) {
+            System.out.println("Nenhuma disciplina cadastrada neste curso.");
+            return;
+        }
+        for (Disciplina disciplina : disciplinas) {
+            System.out.println("  ID: " + disciplina.getId()
+                    + " | Nome: " + disciplina.getNome()
+                    + " | Carga horária: " + disciplina.getCargaHoraria()
+                    + " | Descrição: " + disciplina.getDescricao()
+                    + " | Ativo: " + disciplina.isAtivo());
         }
     }
 
     public boolean atualizarNomeDisciplina(int id, String novoNome) {
-
-        for (Disciplina disciplina : disciplinas) {
-
-            if (disciplina.getId() == id) {
-
-                disciplina.setNome(novoNome);
-                return true;
-            }
+        Disciplina disciplina = buscarDisciplinaPorId(id);
+        if (disciplina == null) {
+            return false;
         }
-
-        return false;
+        disciplina.setNome(novoNome);
+        return true;
     }
 
     public boolean atualizarCargaHorariaDisciplina(int id, int novaCargaHoraria) {
+        Disciplina disciplina = buscarDisciplinaPorId(id);
+        if (disciplina == null) {
+            return false;
+        }
+        disciplina.setCargaHoraria(novaCargaHoraria);
+        return true;
+    }
 
-        for (Disciplina disciplina : disciplinas) {
+    public boolean atualizarDescricaoDisciplina(int id, String novaDescricao) {
+        Disciplina disciplina = buscarDisciplinaPorId(id);
+        if (disciplina == null) {
+            return false;
+        }
+        disciplina.setDescricao(novaDescricao);
+        return true;
+    }
 
-            if (disciplina.getId() == id) {
-
-                disciplina.setCargaHoraria(novaCargaHoraria);
+    public boolean removerDisciplina(int id) {
+        for (int i = 0; i < disciplinas.size(); i++) {
+            if (disciplinas.get(i).getId() == id) {
+                disciplinas.remove(i);
                 return true;
             }
         }
-
         return false;
     }
 
-    public boolean removerDisciplina(int id){
-        for (int i = 0; i < disciplinas.size(); i++){ // roda um for um numero determinado de vezes até o último índice da lista de disciplinas
-            if (disciplinas.get(i).getId() == id){ // checa a disciplina do índice atual do for, usa o getId para ver se é igual ao Id procurado pelo user
-                disciplinas.remove(i); // remove da lista a disciplina do índice encontrado
-                System.out.println("Disciplina removida com sucesso!");
-                return true; // retorna true para o main
+    public Disciplina buscarDisciplinaPorId(int id) {
+        for (Disciplina disciplina : disciplinas) {
+            if (disciplina.getId() == id) {
+                return disciplina;
             }
         }
-        System.out.println("Disciplina não encontrada."); // se não encontrar vai printar a mensagem e retornar false
-        return false;
+        return null;
     }
 
-    public void ativarCurso(){
-
-        ativo = true;
+    public boolean possuiDisciplinaComId(int id) {
+        return buscarDisciplinaPorId(id) != null;
     }
 
-    public void desativarCurso(){
-
-        ativo = false;
-    }
-
-    public boolean getAtivo(){
-
-        return ativo;
-    }
-
-    public void exibirDados(){
-        System.out.println("Exibindo dados...");
-        System.out.println("Valor do curso: R$" + valorMensal);
-        System.out.println("Curso Ativo: " + ativo);
+    public void exibirDados() {
+        System.out.println("ID: " + getId()
+                + " | Nome: " + getNome()
+                + " | Carga horária: " + getCargaHoraria()
+                + " | Valor mensal: R$ " + valorMensal
+                + " | Ativo: " + ativo);
         System.out.println("Disciplinas:");
-        for (Disciplina disciplina : disciplinas){ // roda toda a disciplina e printa os dados de cada uma
-            System.out.println("ID da disciplina: " + disciplina.getId());
-            System.out.println("Disciplina: " + disciplina.getNome());
-            System.out.println("Carga Horária: " + disciplina.getCargaHoraria());
-        }
+        listarDisciplinas();
     }
 }

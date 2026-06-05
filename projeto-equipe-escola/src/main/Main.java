@@ -1,10 +1,17 @@
 package main;
 
+import model.Curso;
+import repository.CursoRepository;
+import service.CursoService;
+
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
+    private static final CursoService cursoService =
+            new CursoService(new CursoRepository());
 
     public static void main(String[] args) {
         int opcao;
@@ -62,12 +69,49 @@ public class Main {
 
     private static int lerOpcao() {
         try {
-            return Integer.parseInt(scanner.nextLine());
+            return Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Erro: digite apenas números.");
             return -1;
         }
     }
+
+    private static String lerLinha(String mensagem) {
+        System.out.print(mensagem);
+        return scanner.nextLine().trim();
+    }
+
+    private static int lerInteiro(String mensagem) {
+        String valor = lerLinha(mensagem);
+        try {
+            return Integer.parseInt(valor);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Valor numérico inválido: " + valor);
+        }
+    }
+
+    private static double lerDouble(String mensagem) {
+        String valor = lerLinha(mensagem).replace(',', '.');
+        try {
+            return Double.parseDouble(valor);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Valor decimal inválido: " + valor);
+        }
+    }
+
+    private static void tratarErro(Runnable acao) {
+        try {
+            acao.run();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
+    }
+
+    private static int lerIdCurso() {
+        return lerInteiro("ID do curso: ");
+    }
+
+    // --- Cursos ---
 
     private static void menuCursos() {
         int opcao;
@@ -86,19 +130,19 @@ public class Main {
 
             switch (opcao) {
                 case 1:
-                    System.out.println("Função cadastrar curso em desenvolvimento.");
+                    tratarErro(Main::cadastrarCurso);
                     break;
                 case 2:
-                    System.out.println("Função listar cursos em desenvolvimento.");
+                    listarCursos();
                     break;
                 case 3:
-                    System.out.println("Função atualizar curso em desenvolvimento.");
+                    tratarErro(Main::atualizarCurso);
                     break;
                 case 4:
-                    System.out.println("Função remover curso em desenvolvimento.");
+                    tratarErro(Main::removerCurso);
                     break;
                 case 5:
-                    System.out.println("Função gerenciar disciplinas de um curso em desenvolvimento.");
+                    menuDisciplinasDoCurso();
                     break;
                 case 0:
                     System.out.println("Voltando ao menu principal...");
@@ -109,6 +153,84 @@ public class Main {
 
         } while (opcao != 0);
     }
+
+    private static void cadastrarCurso() {
+        int id = lerInteiro("ID do curso: ");
+        String nome = lerLinha("Nome do curso: ");
+        int carga = lerInteiro("Carga horária: ");
+        double valor = lerDouble("Valor mensal (R$): ");
+        cursoService.cadastrar(id, nome, carga, valor);
+        System.out.println("Curso cadastrado com sucesso.");
+    }
+
+    private static void listarCursos() {
+        List<Curso> cursos = cursoService.listar();
+        if (cursos.isEmpty()) {
+            System.out.println("Nenhum curso cadastrado.");
+            return;
+        }
+        System.out.println("\n--- Cursos cadastrados ---");
+        for (Curso curso : cursos) {
+            System.out.println();
+            curso.exibirDados();
+        }
+    }
+
+    private static void atualizarCurso() {
+        int id = lerIdCurso();
+        String nome = lerLinha("Novo nome: ");
+        int carga = lerInteiro("Nova carga horária: ");
+        double valor = lerDouble("Novo valor mensal (R$): ");
+        cursoService.atualizar(id, nome, carga, valor);
+        System.out.println("Curso atualizado com sucesso.");
+    }
+
+    private static void removerCurso() {
+        int id = lerIdCurso();
+        cursoService.remover(id);
+        System.out.println("Curso removido com sucesso.");
+    }
+
+    private static void menuDisciplinasDoCurso() {
+        tratarErro(() -> {
+            int idCurso = lerIdCurso();
+            cursoService.buscarPorId(idCurso);
+
+            int opcao;
+            do {
+                System.out.println("\n--- Disciplinas do curso ID " + idCurso + " ---");
+                System.out.println("1 - Cadastrar disciplina");
+                System.out.println("2 - Listar disciplinas");
+                System.out.println("3 - Atualizar disciplina");
+                System.out.println("4 - Remover disciplina");
+                System.out.println("0 - Voltar");
+                System.out.print("Escolha uma opção: ");
+
+                opcao = lerOpcao();
+
+                switch (opcao) {
+                    case 1:
+                        tratarErro(() -> cadastrarDisciplina(idCurso));
+                        break;
+                    case 2:
+                        tratarErro(() -> cursoService.listarDisciplinas(idCurso));
+                        break;
+                    case 3:
+                        tratarErro(() -> atualizarDisciplina(idCurso));
+                        break;
+                    case 4:
+                        tratarErro(() -> removerDisciplina(idCurso));
+                        break;
+                    case 0:
+                        break;
+                    default:
+                        System.out.println("Opção inválida.");
+                }
+            } while (opcao != 0);
+        });
+    }
+
+    // --- Disciplinas (menu global) ---
 
     private static void menuDisciplinas() {
         int opcao;
@@ -128,16 +250,16 @@ public class Main {
 
             switch (opcao) {
                 case 1:
-                    System.out.println("Função cadastrar disciplina em um curso em desenvolvimento.");
+                    tratarErro(() -> cadastrarDisciplina(lerIdCurso()));
                     break;
                 case 2:
-                    System.out.println("Função listar disciplinas de um curso em desenvolvimento.");
+                    tratarErro(() -> cursoService.listarDisciplinas(lerIdCurso()));
                     break;
                 case 3:
-                    System.out.println("Função atualizar disciplina em desenvolvimento.");
+                    tratarErro(() -> atualizarDisciplina(lerIdCurso()));
                     break;
                 case 4:
-                    System.out.println("Função remover disciplina em desenvolvimento.");
+                    tratarErro(() -> removerDisciplina(lerIdCurso()));
                     break;
                 case 5:
                     System.out.println("Função gerenciar turmas de uma disciplina em desenvolvimento.");
@@ -154,6 +276,42 @@ public class Main {
 
         } while (opcao != 0);
     }
+
+    private static void cadastrarDisciplina(int idCurso) {
+        int idDisc = lerInteiro("ID da disciplina: ");
+        String nome = lerLinha("Nome da disciplina: ");
+        int carga = lerInteiro("Carga horária: ");
+        String descricao = lerLinha("Descrição: ");
+        cursoService.adicionarDisciplina(idCurso, idDisc, nome, carga, descricao);
+        System.out.println("Disciplina cadastrada com sucesso.");
+    }
+
+    private static void atualizarDisciplina(int idCurso) {
+        int idDisc = lerInteiro("ID da disciplina: ");
+        System.out.println("1 - Nome | 2 - Carga horária | 3 - Descrição");
+        int campo = lerOpcao();
+        switch (campo) {
+            case 1:
+                cursoService.atualizarNomeDisciplina(idCurso, idDisc, lerLinha("Novo nome: "));
+                break;
+            case 2:
+                cursoService.atualizarCargaHorariaDisciplina(idCurso, idDisc, lerInteiro("Nova carga horária: "));
+                break;
+            case 3:
+                cursoService.atualizarDescricaoDisciplina(idCurso, idDisc, lerLinha("Nova descrição: "));
+                break;
+            default:
+                throw new IllegalArgumentException("Campo inválido para atualização.");
+        }
+        System.out.println("Disciplina atualizada com sucesso.");
+    }
+
+    private static void removerDisciplina(int idCurso) {
+        int idDisc = lerInteiro("ID da disciplina: ");
+        cursoService.removerDisciplina(idCurso, idDisc);
+    }
+
+    // --- Demais menus (ainda em desenvolvimento) ---
 
     private static void menuTurmas() {
         int opcao;
