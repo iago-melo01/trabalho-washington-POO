@@ -2,6 +2,7 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 
 public class Curso extends ConteudoEducacional {
     private double valorMensal;
@@ -39,8 +40,18 @@ public class Curso extends ConteudoEducacional {
         return disciplinas;
     }
 
-    public void adicionarDisciplina(int id, String nome, int cargaHoraria, String descricao, boolean ativo) {
-        disciplinas.add(new Disciplina(id, nome, cargaHoraria, descricao, ativo));
+    public void adicionarDisciplina(int id,String nome,int cargaHoraria,String descricao,boolean ativo) {
+        disciplinas.add(
+                new Disciplina(
+                        id,
+                        nome,
+                        cargaHoraria,
+                        descricao,
+                        ativo,
+                        new ArrayList<>(),
+                        new HashSet<>()
+                )
+        );
     }
 
     public void listarDisciplinas() {
