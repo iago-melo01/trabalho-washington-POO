@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 
-public class Curso extends ConteudoEducacional {
+public class Curso extends ConteudoEducacional implements Gerenciavel {
     private double valorMensal;
     private boolean ativo;
     private final List<Disciplina> disciplinas;
@@ -24,14 +24,17 @@ public class Curso extends ConteudoEducacional {
         this.valorMensal = valorMensal;
     }
 
+    @Override
     public boolean isAtivo() {
         return ativo;
     }
 
+    @Override
     public void ativar() {
         ativo = true;
     }
 
+    @Override
     public void desativar() {
         ativo = false;
     }
@@ -59,6 +62,7 @@ public class Curso extends ConteudoEducacional {
             System.out.println("Nenhuma disciplina cadastrada neste curso.");
             return;
         }
+
         for (Disciplina disciplina : disciplinas) {
             System.out.println("  ID: " + disciplina.getId()
                     + " | Nome: " + disciplina.getNome()
@@ -70,27 +74,33 @@ public class Curso extends ConteudoEducacional {
 
     public boolean atualizarNomeDisciplina(int id, String novoNome) {
         Disciplina disciplina = buscarDisciplinaPorId(id);
+
         if (disciplina == null) {
             return false;
         }
+
         disciplina.setNome(novoNome);
         return true;
     }
 
     public boolean atualizarCargaHorariaDisciplina(int id, int novaCargaHoraria) {
         Disciplina disciplina = buscarDisciplinaPorId(id);
+
         if (disciplina == null) {
             return false;
         }
+
         disciplina.setCargaHoraria(novaCargaHoraria);
         return true;
     }
 
     public boolean atualizarDescricaoDisciplina(int id, String novaDescricao) {
         Disciplina disciplina = buscarDisciplinaPorId(id);
+
         if (disciplina == null) {
             return false;
         }
+
         disciplina.setDescricao(novaDescricao);
         return true;
     }
@@ -102,6 +112,7 @@ public class Curso extends ConteudoEducacional {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -111,6 +122,7 @@ public class Curso extends ConteudoEducacional {
                 return disciplina;
             }
         }
+
         return null;
     }
 

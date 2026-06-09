@@ -3,7 +3,7 @@ package model;
 import java.util.List;
 import java.util.Set;
 
-public class Disciplina extends ConteudoEducacional {
+public class Disciplina extends ConteudoEducacional implements Gerenciavel {
 
     private String descricao;
     private boolean ativo;
@@ -28,8 +28,19 @@ public class Disciplina extends ConteudoEducacional {
         this.descricao = descricao;
     }
 
+    @Override
     public boolean isAtivo() {
         return ativo;
+    }
+
+    @Override
+    public void ativar() {
+        ativo = true;
+    }
+
+    @Override
+    public void desativar() {
+        ativo = false;
     }
 
     public void setAtivo(boolean ativo) {
@@ -136,14 +147,6 @@ public class Disciplina extends ConteudoEducacional {
 
         System.out.println("Professor não encontrado.");
         return false;
-    }
-
-    public void ativar() {
-        ativo = true;
-    }
-
-    public void desativar() {
-        ativo = false;
     }
 
     public void exibirDados() {

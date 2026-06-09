@@ -16,5 +16,25 @@ public abstract class Pessoa {
         this.dataNascimento = dataNascimento;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public String getDataNascimento() {
+        return dataNascimento;
+    }
+
     public abstract void exibirDados();
 }
