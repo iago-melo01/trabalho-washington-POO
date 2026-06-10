@@ -47,7 +47,7 @@ public class Turma {
         }
 
         for (Aluno aluno : alunos.values()) {
-            System.out.println(aluno);
+            aluno.exibirDados();
         }
     }
 

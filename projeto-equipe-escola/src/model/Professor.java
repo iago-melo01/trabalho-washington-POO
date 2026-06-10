@@ -11,6 +11,14 @@ public class Professor extends Pessoa {
         this.especialidade = especialidade;
     }
 
+    public String getEspecialidade() {
+        return especialidade;
+    }
+
+    public void setEspecialidade(String especialidade) {
+        this.especialidade = especialidade;
+    }
+
     public void lancarNota() {
         System.out.println("Nota lançada.");
     }
