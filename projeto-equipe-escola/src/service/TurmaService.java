@@ -22,6 +22,9 @@ public class TurmaService {
                           String codigo, String turno, String sala) {
         Validador.validarTextoObrigatorio(codigo, "Código");
         Disciplina disciplina = buscarDisciplina(idCurso, idDisciplina);
+        if (!disciplina.isAtivo()) {
+            throw new IllegalArgumentException("Não é possível cadastrar turma em disciplina inativa.");
+        }
         for (Turma turma : disciplina.getTurmas()) {
             if (turma.getId() == idTurma) {
                 throw new IllegalArgumentException("Já existe turma com o ID " + idTurma + " nesta disciplina.");

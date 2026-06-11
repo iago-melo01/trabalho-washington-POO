@@ -150,7 +150,9 @@ public class Main {
             System.out.println("2 - Listar cursos");
             System.out.println("3 - Atualizar curso");
             System.out.println("4 - Remover curso");
-            System.out.println("5 - Gerenciar disciplinas de um curso");
+            System.out.println("5 - Ativar curso");
+            System.out.println("6 - Desativar curso");
+            System.out.println("7 - Gerenciar disciplinas de um curso");
             System.out.println("0 - Voltar");
             System.out.print("Escolha uma opção: ");
 
@@ -170,6 +172,12 @@ public class Main {
                     tratarErro(Main::removerCurso);
                     break;
                 case 5:
+                    tratarErro(Main::ativarCurso);
+                    break;
+                case 6:
+                    tratarErro(Main::desativarCurso);
+                    break;
+                case 7:
                     menuDisciplinasDoCurso();
                     break;
                 case 0:
@@ -219,6 +227,18 @@ public class Main {
         System.out.println("Curso removido com sucesso.");
     }
 
+    private static void ativarCurso() {
+        int id = lerIdCurso();
+        cursoService.ativarCurso(id);
+        System.out.println("Curso ativado com sucesso.");
+    }
+
+    private static void desativarCurso() {
+        int id = lerIdCurso();
+        cursoService.desativarCurso(id);
+        System.out.println("Curso desativado com sucesso.");
+    }
+
     private static void menuDisciplinasDoCurso() {
         tratarErro(() -> {
             int idCurso = lerIdCurso();
@@ -231,6 +251,8 @@ public class Main {
                 System.out.println("2 - Listar disciplinas");
                 System.out.println("3 - Atualizar disciplina");
                 System.out.println("4 - Remover disciplina");
+                System.out.println("5 - Ativar disciplina");
+                System.out.println("6 - Desativar disciplina");
                 System.out.println("0 - Voltar");
                 System.out.print("Escolha uma opção: ");
 
@@ -248,6 +270,12 @@ public class Main {
                         break;
                     case 4:
                         tratarErro(() -> removerDisciplina(idCurso));
+                        break;
+                    case 5:
+                        tratarErro(() -> ativarDisciplina(idCurso));
+                        break;
+                    case 6:
+                        tratarErro(() -> desativarDisciplina(idCurso));
                         break;
                     case 0:
                         break;
@@ -269,8 +297,10 @@ public class Main {
             System.out.println("2 - Listar disciplinas de um curso");
             System.out.println("3 - Atualizar disciplina");
             System.out.println("4 - Remover disciplina");
-            System.out.println("5 - Gerenciar turmas de uma disciplina");
-            System.out.println("6 - Gerenciar professores aptos");
+            System.out.println("5 - Ativar disciplina");
+            System.out.println("6 - Desativar disciplina");
+            System.out.println("7 - Gerenciar turmas de uma disciplina");
+            System.out.println("8 - Gerenciar professores aptos");
             System.out.println("0 - Voltar");
             System.out.print("Escolha uma opção: ");
 
@@ -290,9 +320,15 @@ public class Main {
                     tratarErro(() -> removerDisciplina(lerIdCurso()));
                     break;
                 case 5:
-                    menuTurmasDisciplina();
+                    tratarErro(() -> ativarDisciplina(lerIdCurso()));
                     break;
                 case 6:
+                    tratarErro(() -> desativarDisciplina(lerIdCurso()));
+                    break;
+                case 7:
+                    menuTurmasDisciplina();
+                    break;
+                case 8:
                     menuProfessoresAptos();
                     break;
                 case 0:
@@ -337,6 +373,18 @@ public class Main {
     private static void removerDisciplina(int idCurso) {
         int idDisc = lerInteiro("ID da disciplina: ");
         cursoService.removerDisciplina(idCurso, idDisc);
+    }
+
+    private static void ativarDisciplina(int idCurso) {
+        int idDisc = lerInteiro("ID da disciplina: ");
+        cursoService.ativarDisciplina(idCurso, idDisc);
+        System.out.println("Disciplina ativada com sucesso.");
+    }
+
+    private static void desativarDisciplina(int idCurso) {
+        int idDisc = lerInteiro("ID da disciplina: ");
+        cursoService.desativarDisciplina(idCurso, idDisc);
+        System.out.println("Disciplina desativada com sucesso.");
     }
 
     private static void menuTurmasDisciplina() {

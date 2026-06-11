@@ -1,6 +1,7 @@
 package service;
 
 import model.Curso;
+import model.Disciplina;
 import repository.CursoRepository;
 import java.util.List;
 
@@ -62,6 +63,9 @@ public class CursoService {
             throw new IllegalArgumentException("Carga horária da disciplina deve ser maior que zero.");
         }
         Curso curso = buscarPorId(idCurso);
+        if (!curso.isAtivo()) {
+            throw new IllegalArgumentException("Não é possível adicionar disciplina em curso inativo.");
+        }
         if (curso.possuiDisciplinaComId(idDisciplina)) {
             throw new IllegalArgumentException("Já existe disciplina com o ID " + idDisciplina + " neste curso.");
         }
@@ -113,6 +117,23 @@ public class CursoService {
 
     public void desativarCurso(int id) {
         buscarPorId(id).desativar();
+    }
+
+    public void ativarDisciplina(int idCurso, int idDisciplina) {
+        buscarDisciplina(idCurso, idDisciplina).ativar();
+    }
+
+    public void desativarDisciplina(int idCurso, int idDisciplina) {
+        buscarDisciplina(idCurso, idDisciplina).desativar();
+    }
+
+    private Disciplina buscarDisciplina(int idCurso, int idDisciplina) {
+        Curso curso = buscarPorId(idCurso);
+        Disciplina disciplina = curso.buscarDisciplinaPorId(idDisciplina);
+        if (disciplina == null) {
+            throw new IllegalArgumentException("Disciplina não encontrada no curso: ID " + idDisciplina);
+        }
+        return disciplina;
     }
 
     private void validarNome(String nome) {
