@@ -29,6 +29,11 @@ public class Professor extends Pessoa {
 
     @Override
     public void exibirDados() {
-        System.out.println("Professor: " + nome);
+        System.out.println("ID: " + getId()
+                + " | Nome: " + getNome()
+                + " | Email: " + getEmail()
+                + " | CPF: " + getCpf()
+                + " | Data de nascimento: " + getDataNascimento()
+                + " | Especialidade: " + especialidade);
     }
 }
