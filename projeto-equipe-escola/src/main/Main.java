@@ -4,6 +4,9 @@ import model.Aluno;
 import model.Curso;
 import model.Matricula;
 import model.Professor;
+import model.Turma;
+import model.Escola;
+import model.Disciplina;
 import repository.AlunoRepository;
 import repository.CursoRepository;
 import repository.MatriculaRepository;
@@ -33,13 +36,22 @@ public class Main {
             new MatriculaService(alunoRepository, matriculaRepository, turmaService);
     private static final NotaService notaService = new NotaService(matriculaService);
 
-    public static void main(String[] args) {
-        int opcao;
+    private static Escola escola;
 
+    public static void main(String[] args) {
+        escola = new Escola(
+                1,
+                lerLinha("Nome da escola: "),
+                "",
+                ""
+        );
+    
+        int opcao;
+    
         do {
             exibirMenuPrincipal();
             opcao = lerOpcao();
-
+    
             switch (opcao) {
                 case 1:
                     menuCursos();
@@ -63,19 +75,19 @@ public class Main {
                     menuNotas();
                     break;
                 case 0:
-                    System.out.println("Encerrando o sistema...");
+                    System.out.println("Encerrando o sistema da escola " + escola.getNome() + "...");
                     break;
                 default:
                     System.out.println("Opção inválida.");
             }
-
+    
         } while (opcao != 0);
-
+    
         scanner.close();
     }
 
     private static void exibirMenuPrincipal() {
-        System.out.println("\n===== SISTEMA ESCOLA/CURSO =====");
+        System.out.println("\n===== " + escola.getNome().toUpperCase() + " =====");
         System.out.println("1 - Gerenciar cursos");
         System.out.println("2 - Gerenciar disciplinas");
         System.out.println("3 - Gerenciar turmas");
@@ -86,7 +98,7 @@ public class Main {
         System.out.println("0 - Sair");
         System.out.print("Escolha uma opção: ");
     }
-
+    
     private static int lerOpcao() {
         try {
             return Integer.parseInt(scanner.nextLine().trim());
@@ -214,10 +226,29 @@ public class Main {
 
     private static void atualizarCurso() {
         int id = lerIdCurso();
-        String nome = lerLinha("Novo nome: ");
-        int carga = lerInteiro("Nova carga horária: ");
-        double valor = lerDouble("Novo valor mensal (R$): ");
+    
+        Curso curso = cursoService.buscarPorId(id);
+    
+        System.out.println("Pressione ENTER para manter o valor atual.");
+    
+        String nome = lerLinha("Novo nome (" + curso.getNome() + "): ");
+        String cargaStr = lerLinha("Nova carga horária (" + curso.getCargaHoraria() + "): ");
+        String valorStr = lerLinha("Novo valor mensal (R$ " + curso.getValorMensal() + "): ");
+    
+        if (nome.isBlank()) {
+            nome = curso.getNome();
+        }
+    
+        int carga = cargaStr.isBlank()
+                ? curso.getCargaHoraria()
+                : Integer.parseInt(cargaStr);
+    
+        double valor = valorStr.isBlank()
+                ? curso.getValorMensal()
+                : Double.parseDouble(valorStr);
+    
         cursoService.atualizar(id, nome, carga, valor);
+    
         System.out.println("Curso atualizado com sucesso.");
     }
 
@@ -352,21 +383,43 @@ public class Main {
 
     private static void atualizarDisciplina(int idCurso) {
         int idDisc = lerInteiro("ID da disciplina: ");
-        System.out.println("1 - Nome | 2 - Carga horária | 3 - Descrição");
-        int campo = lerOpcao();
-        switch (campo) {
-            case 1:
-                cursoService.atualizarNomeDisciplina(idCurso, idDisc, lerLinha("Novo nome: "));
-                break;
-            case 2:
-                cursoService.atualizarCargaHorariaDisciplina(idCurso, idDisc, lerInteiro("Nova carga horária: "));
-                break;
-            case 3:
-                cursoService.atualizarDescricaoDisciplina(idCurso, idDisc, lerLinha("Nova descrição: "));
-                break;
-            default:
-                throw new IllegalArgumentException("Campo inválido para atualização.");
+    
+        Disciplina disciplina = cursoService.buscarDisciplina(idCurso, idDisc);
+    
+        System.out.println("Pressione ENTER para manter o valor atual.");
+    
+        String nome = lerLinha(
+                "Novo nome (" + disciplina.getNome() + "): "
+        );
+    
+        String cargaStr = lerLinha(
+                "Nova carga horária (" + disciplina.getCargaHoraria() + "): "
+        );
+    
+        String descricao = lerLinha(
+                "Nova descrição (" + disciplina.getDescricao() + "): "
+        );
+    
+        if (nome.isBlank()) {
+            nome = disciplina.getNome();
         }
+    
+        int carga = cargaStr.isBlank()
+                ? disciplina.getCargaHoraria()
+                : Integer.parseInt(cargaStr);
+    
+        if (descricao.isBlank()) {
+            descricao = disciplina.getDescricao();
+        }
+    
+        cursoService.atualizarDisciplina(
+                idCurso,
+                idDisc,
+                nome,
+                carga,
+                descricao
+        );
+    
         System.out.println("Disciplina atualizada com sucesso.");
     }
 
@@ -542,9 +595,40 @@ public class Main {
 
     private static void atualizarTurma(int idCurso, int idDisciplina) {
         int idTurma = lerIdTurma();
-        String turno = lerLinha("Novo turno: ");
-        String sala = lerLinha("Nova sala: ");
-        turmaService.atualizar(idCurso, idDisciplina, idTurma, turno, sala);
+    
+        Turma turma = turmaService.buscarPorId(
+                idCurso,
+                idDisciplina,
+                idTurma
+        );
+    
+        System.out.println("Pressione ENTER para manter o valor atual.");
+    
+        String turno = lerLinha(
+                "Novo turno (" + turma.getTurno() + "): "
+        );
+    
+        String sala = lerLinha(
+                "Nova sala (" + turma.getSala() + "): "
+        );
+    
+        if (turno.isBlank()) {
+            turno = turma.getTurno();
+        }
+    
+        if (sala.isBlank()) {
+            sala = turma.getSala();
+        }
+    
+        turmaService.atualizar(
+                idCurso,
+                idDisciplina,
+                idTurma,
+                turno,
+                sala
+        );
+    
+        System.out.println("Turma atualizada com sucesso.");
     }
 
     private static void removerTurma() {
@@ -576,17 +660,19 @@ public class Main {
 
     private static void menuAlunos() {
         int opcao;
-
+    
         do {
             System.out.println("\n===== GERENCIAR ALUNOS =====");
             System.out.println("1 - Cadastrar aluno");
             System.out.println("2 - Listar alunos");
-            System.out.println("3 - Consultar matrículas do aluno");
+            System.out.println("3 - Atualizar aluno");
+            System.out.println("4 - Remover aluno");
+            System.out.println("5 - Consultar matrículas do aluno");
             System.out.println("0 - Voltar");
             System.out.print("Escolha uma opção: ");
-
+    
             opcao = lerOpcao();
-
+    
             switch (opcao) {
                 case 1:
                     tratarErro(Main::cadastrarAluno);
@@ -595,6 +681,12 @@ public class Main {
                     listarAlunos();
                     break;
                 case 3:
+                    tratarErro(Main::atualizarAluno);
+                    break;
+                case 4:
+                    tratarErro(Main::removerAluno);
+                    break;
+                case 5:
                     tratarErro(Main::consultarMatriculasAluno);
                     break;
                 case 0:
@@ -603,7 +695,7 @@ public class Main {
                 default:
                     System.out.println("Opção inválida.");
             }
-
+    
         } while (opcao != 0);
     }
 
@@ -641,18 +733,66 @@ public class Main {
         }
     }
 
+    private static void atualizarAluno() {
+        int id = lerInteiro("ID do aluno que deseja atualizar: ");
+    
+        Aluno aluno = alunoService.buscarPorId(id);
+    
+        System.out.println("Pressione ENTER para manter o valor atual.");
+    
+        String nome = lerLinha("Novo nome (" + aluno.getNome() + "): ");
+        String email = lerLinha("Novo e-mail (" + aluno.getEmail() + "): ");
+        String cpf = lerLinha("Novo CPF (" + aluno.getCpf() + "): ");
+        String dataNasc = lerLinha("Nova data de nascimento (" + aluno.getDataNascimento() + "): ");
+        String matricula = lerLinha("Nova matrícula (" + aluno.getMatricula() + "): ");
+    
+        if (nome.isBlank()) {
+            nome = aluno.getNome();
+        }
+    
+        if (email.isBlank()) {
+            email = aluno.getEmail();
+        }
+    
+        if (cpf.isBlank()) {
+            cpf = aluno.getCpf();
+        }
+    
+        if (dataNasc.isBlank()) {
+            dataNasc = aluno.getDataNascimento();
+        }
+    
+        if (matricula.isBlank()) {
+            matricula = aluno.getMatricula();
+        }
+    
+        alunoService.atualizar(id, nome, email, cpf, dataNasc, matricula);
+    
+        System.out.println("Aluno atualizado com sucesso.");
+    }
+    
+    private static void removerAluno() {
+        int id = lerInteiro("ID do aluno que deseja remover: ");
+    
+        alunoService.remover(id);
+    
+        System.out.println("Aluno removido com sucesso.");
+    }
+
     private static void menuProfessores() {
         int opcao;
-
+    
         do {
             System.out.println("\n===== GERENCIAR PROFESSORES =====");
             System.out.println("1 - Cadastrar professor");
             System.out.println("2 - Listar professores");
+            System.out.println("3 - Atualizar professor");
+            System.out.println("4 - Remover professor");
             System.out.println("0 - Voltar");
             System.out.print("Escolha uma opção: ");
-
+    
             opcao = lerOpcao();
-
+    
             switch (opcao) {
                 case 1:
                     tratarErro(Main::cadastrarProfessor);
@@ -660,13 +800,19 @@ public class Main {
                 case 2:
                     listarProfessores();
                     break;
+                case 3:
+                    tratarErro(Main::atualizarProfessor);
+                    break;
+                case 4:
+                    tratarErro(Main::removerProfessor);
+                    break;
                 case 0:
                     System.out.println("Voltando ao menu principal...");
                     break;
                 default:
                     System.out.println("Opção inválida.");
             }
-
+    
         } while (opcao != 0);
     }
 
@@ -690,6 +836,59 @@ public class Main {
         for (Professor professor : professores) {
             professor.exibirDados();
         }
+    }
+
+    private static void atualizarProfessor() {
+        int id = lerInteiro("ID do professor que deseja atualizar: ");
+    
+        Professor professor = professorService.buscarPorId(id);
+    
+        System.out.println("Pressione ENTER para manter o valor atual.");
+    
+        String nome = lerLinha("Novo nome (" + professor.getNome() + "): ");
+        String email = lerLinha("Novo e-mail (" + professor.getEmail() + "): ");
+        String cpf = lerLinha("Novo CPF (" + professor.getCpf() + "): ");
+        String dataNasc = lerLinha("Nova data de nascimento (" + professor.getDataNascimento() + "): ");
+        String especialidade = lerLinha("Nova especialidade (" + professor.getEspecialidade() + "): ");
+    
+        if (nome.isBlank()) {
+            nome = professor.getNome();
+        }
+    
+        if (email.isBlank()) {
+            email = professor.getEmail();
+        }
+    
+        if (cpf.isBlank()) {
+            cpf = professor.getCpf();
+        }
+    
+        if (dataNasc.isBlank()) {
+            dataNasc = professor.getDataNascimento();
+        }
+    
+        if (especialidade.isBlank()) {
+            especialidade = professor.getEspecialidade();
+        }
+    
+        professorService.atualizar(
+                id,
+                nome,
+                email,
+                cpf,
+                dataNasc,
+                especialidade
+        );
+    
+        System.out.println("Professor atualizado com sucesso.");
+    }
+
+    private static void removerProfessor() {
+        int id = lerInteiro("ID do professor que deseja remover: ");
+    
+        professorService.remover(id);
+    
+        System.out.println("Professor removido com sucesso.");
     }
 
     private static void menuMatriculas() {
