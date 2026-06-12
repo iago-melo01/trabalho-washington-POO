@@ -66,15 +66,21 @@ public class Disciplina extends ConteudoEducacional implements Gerenciavel {
             System.out.println("Nenhuma turma cadastrada.");
             return;
         }
-
+    
         for (Turma turma : turmas) {
-
+    
             System.out.println("ID: " + turma.getId());
             System.out.println("Código: " + turma.getCodigo());
             System.out.println("Turno: " + turma.getTurno());
             System.out.println("Sala: " + turma.getSala());
             System.out.println("Ativa: " + turma.isAtivo());
-
+    
+            if (turma.getProfessor() != null) {
+                System.out.println("Professor: " + turma.getProfessor().getNome());
+            } else {
+                System.out.println("Professor: Não definido");
+            }
+    
             System.out.println("-------------------------");
         }
     }
@@ -147,6 +153,16 @@ public class Disciplina extends ConteudoEducacional implements Gerenciavel {
 
         System.out.println("Professor não encontrado.");
         return false;
+    }
+
+    public Turma buscarTurmaPorId(int idTurma) {
+        for (Turma turma : turmas) {
+            if (turma.getId() == idTurma) {
+                return turma;
+            }
+        }
+    
+        return null;
     }
 
     public void exibirDados() {
