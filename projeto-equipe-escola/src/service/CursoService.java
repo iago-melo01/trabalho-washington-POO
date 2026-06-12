@@ -78,29 +78,26 @@ public class CursoService {
         curso.listarDisciplinas();
     }
 
-    public void atualizarNomeDisciplina(int idCurso, int idDisciplina, String novoNome) {
-        validarNome(novoNome);
-        Curso curso = buscarPorId(idCurso);
-        if (!curso.atualizarNomeDisciplina(idDisciplina, novoNome)) {
-            throw new IllegalArgumentException("Disciplina não encontrada no curso: ID " + idDisciplina);
-        }
-    }
+    public void atualizarDisciplina(
+            int idCurso,
+            int idDisciplina,
+            String nome,
+            int cargaHoraria,
+            String descricao) {
 
-    public void atualizarCargaHorariaDisciplina(int idCurso, int idDisciplina, int novaCarga) {
-        if (novaCarga <= 0) {
-            throw new IllegalArgumentException("Carga horária deve ser maior que zero.");
-        }
-        Curso curso = buscarPorId(idCurso);
-        if (!curso.atualizarCargaHorariaDisciplina(idDisciplina, novaCarga)) {
-            throw new IllegalArgumentException("Disciplina não encontrada no curso: ID " + idDisciplina);
-        }
-    }
+        validarNome(nome);
 
-    public void atualizarDescricaoDisciplina(int idCurso, int idDisciplina, String descricao) {
-        Curso curso = buscarPorId(idCurso);
-        if (!curso.atualizarDescricaoDisciplina(idDisciplina, descricao)) {
-            throw new IllegalArgumentException("Disciplina não encontrada no curso: ID " + idDisciplina);
+        if (cargaHoraria <= 0) {
+            throw new IllegalArgumentException(
+                    "Carga horária deve ser maior que zero."
+            );
         }
+
+        Disciplina disciplina = buscarDisciplina(idCurso, idDisciplina);
+
+        disciplina.setNome(nome);
+        disciplina.setCargaHoraria(cargaHoraria);
+        disciplina.setDescricao(descricao);
     }
 
     public void removerDisciplina(int idCurso, int idDisciplina) {
@@ -127,7 +124,7 @@ public class CursoService {
         buscarDisciplina(idCurso, idDisciplina).desativar();
     }
 
-    private Disciplina buscarDisciplina(int idCurso, int idDisciplina) {
+    public Disciplina buscarDisciplina(int idCurso, int idDisciplina) {
         Curso curso = buscarPorId(idCurso);
         Disciplina disciplina = curso.buscarDisciplinaPorId(idDisciplina);
         if (disciplina == null) {
