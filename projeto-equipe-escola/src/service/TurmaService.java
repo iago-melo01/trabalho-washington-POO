@@ -107,4 +107,18 @@ public class TurmaService {
         }
         return disciplina;
     }
+
+    public Turma buscarPorId(int idCurso, int idDisciplina, int idTurma) {
+        Disciplina disciplina = buscarDisciplina(idCurso, idDisciplina);
+
+        Turma turma = disciplina.buscarTurmaPorId(idTurma);
+
+        if (turma == null) {
+            throw new IllegalArgumentException(
+                    "Turma não encontrada: ID " + idTurma
+            );
+        }
+
+        return turma;
+    }
 }

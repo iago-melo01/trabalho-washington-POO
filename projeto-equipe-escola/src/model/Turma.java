@@ -37,7 +37,6 @@ public class Turma {
         }
 
         alunos.put(aluno.getId(), aluno);
-        System.out.println("Aluno adicionado com sucesso.");
     }
 
     public void listarAlunos() {
@@ -67,7 +66,6 @@ public class Turma {
     public void atualizarDados(String novoTurno, String novaSala) {
         this.turno = novoTurno;
         this.sala = novaSala;
-        System.out.println("Dados da turma atualizados com sucesso.");
     }
 
     public void ativar() {
