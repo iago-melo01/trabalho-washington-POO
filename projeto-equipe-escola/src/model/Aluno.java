@@ -29,6 +29,11 @@ public class Aluno extends Pessoa {
 
     @Override
     public void exibirDados() {
-        System.out.println("Aluno: " + nome);
+        System.out.println("ID: " + getId()
+                + " | Nome: " + getNome()
+                + " | Email: " + getEmail()
+                + " | CPF: " + getCpf()
+                + " | Data de nascimento: " + getDataNascimento()
+                + " | Matrícula: " + matricula);
     }
 }
