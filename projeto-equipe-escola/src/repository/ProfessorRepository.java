@@ -8,6 +8,11 @@ import java.util.Optional;
 public class ProfessorRepository {
 
     private final List<Professor> professores = new ArrayList<>();
+    private int proximoId = 1;
+
+    public int gerarId() {
+        return proximoId++;
+    }
 
     public void salvar(Professor professor) {
         professores.add(professor);

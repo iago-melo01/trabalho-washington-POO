@@ -9,8 +9,6 @@ public class Matricula {
     public static final String STATUS_CONFIRMADA = "CONFIRMADA";
     public static final String STATUS_CANCELADA  = "CANCELADA";
 
-    private static int contadorId = 1;
-
     private int    id;
     private Date   dataMatricula;
     private String status;
@@ -18,13 +16,13 @@ public class Matricula {
     private Aluno  aluno;
     private Turma  turma;
 
-    public Matricula(Aluno aluno, Turma turma) throws MatriculaInvalidaException {
+    public Matricula(int id, Aluno aluno, Turma turma) throws MatriculaInvalidaException {
         if (aluno == null)
             throw new MatriculaInvalidaException("Aluno não pode ser nulo para criar uma matrícula.");
         if (turma == null)
             throw new MatriculaInvalidaException("Turma não pode ser nula para criar uma matrícula.");
 
-        this.id            = contadorId++;
+        this.id            = id;
         this.aluno         = aluno;
         this.turma         = turma;
         this.dataMatricula = new Date();

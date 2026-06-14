@@ -8,6 +8,11 @@ import java.util.Optional;
 public class MatriculaRepository {
 
     private final List<Matricula> matriculas = new ArrayList<>();
+    private int proximoId = 1;
+
+    public int gerarId() {
+        return proximoId++;
+    }
 
     public void salvar(Matricula matricula) {
         matriculas.add(matricula);
@@ -17,6 +22,10 @@ public class MatriculaRepository {
         return matriculas.stream()
                 .filter(m -> m.getId() == id)
                 .findFirst();
+    }
+
+    public List<Matricula> listar() {
+        return new ArrayList<>(matriculas);
     }
 
     public List<Matricula> listarPorAluno(int idAluno) {

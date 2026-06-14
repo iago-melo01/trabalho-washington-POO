@@ -57,7 +57,6 @@ public class Disciplina extends ConteudoEducacional implements Gerenciavel {
 
     public void adicionarTurma(Turma turma) {
         turmas.add(turma);
-        System.out.println("Turma adicionada com sucesso.");
     }
 
     public void listarTurmas() {

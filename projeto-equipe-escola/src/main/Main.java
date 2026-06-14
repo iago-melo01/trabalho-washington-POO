@@ -7,6 +7,7 @@ import model.Professor;
 import model.Turma;
 import model.Escola;
 import model.Disciplina;
+import model.Pessoa;
 import repository.AlunoRepository;
 import repository.CursoRepository;
 import repository.MatriculaRepository;
@@ -18,6 +19,7 @@ import service.NotaService;
 import service.ProfessorService;
 import service.TurmaService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -74,6 +76,9 @@ public class Main {
                 case 7:
                     menuNotas();
                     break;
+                case 8:
+                    listarPessoasDoSistema();
+                    break;
                 case 0:
                     System.out.println("Encerrando o sistema da escola " + escola.getNome() + "...");
                     break;
@@ -95,6 +100,7 @@ public class Main {
         System.out.println("5 - Gerenciar professores");
         System.out.println("6 - Gerenciar matrículas");
         System.out.println("7 - Gerenciar notas");
+        System.out.println("8 - Listar pessoas do sistema");
         System.out.println("0 - Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -139,15 +145,109 @@ public class Main {
         }
     }
 
+    private static void listarPessoasDoSistema() {
+        List<Pessoa> pessoas = new ArrayList<>();
+        pessoas.addAll(alunoService.listar());
+        pessoas.addAll(professorService.listar());
+
+        if (pessoas.isEmpty()) {
+            System.out.println("Nenhuma pessoa cadastrada no sistema.");
+            return;
+        }
+
+        System.out.println("\n--- Pessoas cadastradas no sistema ---");
+        for (Pessoa pessoa : pessoas) {
+            pessoa.exibirDados();
+        }
+    }
+
+    private static void exibirCursosResumo() {
+        List<Curso> cursos = cursoService.listar();
+        if (cursos.isEmpty()) {
+            System.out.println("Nenhum curso cadastrado.");
+            return;
+        }
+        System.out.println("\n--- Cursos cadastrados ---");
+        for (Curso curso : cursos) {
+            System.out.println("ID: " + curso.getId() + " | Nome: " + curso.getNome());
+        }
+    }
+
+    private static void exibirDisciplinasResumo(int idCurso) {
+        Curso curso = cursoService.buscarPorId(idCurso);
+        List<Disciplina> disciplinas = curso.getDisciplinas();
+        if (disciplinas.isEmpty()) {
+            System.out.println("Nenhuma disciplina cadastrada neste curso.");
+            return;
+        }
+        System.out.println("\n--- Disciplinas cadastradas ---");
+        for (Disciplina disciplina : disciplinas) {
+            System.out.println("ID: " + disciplina.getId() + " | Nome: " + disciplina.getNome());
+        }
+    }
+
+    private static void exibirTurmasResumo(int idCurso, int idDisciplina) {
+        Disciplina disciplina = cursoService.buscarDisciplina(idCurso, idDisciplina);
+        List<Turma> turmas = disciplina.getTurmas();
+        if (turmas.isEmpty()) {
+            System.out.println("Nenhuma turma cadastrada nesta disciplina.");
+            return;
+        }
+        System.out.println("\n--- Turmas cadastradas ---");
+        for (Turma turma : turmas) {
+            System.out.println("ID: " + turma.getId() + " | Código: " + turma.getCodigo()
+                    + " | Turno: " + turma.getTurno() + " | Sala: " + turma.getSala());
+        }
+    }
+
+    private static void exibirAlunosResumo() {
+        List<Aluno> alunos = alunoService.listar();
+        if (alunos.isEmpty()) {
+            System.out.println("Nenhum aluno cadastrado.");
+            return;
+        }
+        System.out.println("\n--- Alunos cadastrados ---");
+        for (Aluno aluno : alunos) {
+            System.out.println("ID: " + aluno.getId() + " | Nome: " + aluno.getNome());
+        }
+    }
+
+    private static void exibirProfessoresResumo() {
+        List<Professor> professores = professorService.listar();
+        if (professores.isEmpty()) {
+            System.out.println("Nenhum professor cadastrado.");
+            return;
+        }
+        System.out.println("\n--- Professores cadastrados ---");
+        for (Professor professor : professores) {
+            System.out.println("ID: " + professor.getId() + " | Nome: " + professor.getNome());
+        }
+    }
+
+    private static void exibirMatriculasResumo() {
+        List<Matricula> matriculas = matriculaService.listar();
+        if (matriculas.isEmpty()) {
+            System.out.println("Nenhuma matrícula cadastrada.");
+            return;
+        }
+        System.out.println("\n--- Matrículas cadastradas ---");
+        for (Matricula matricula : matriculas) {
+            System.out.println(matricula);
+        }
+    }
+
     private static int lerIdCurso() {
+        exibirCursosResumo();
         return lerInteiro("ID do curso: ");
     }
 
-    private static int lerIdDisciplina() {
+    private static int lerIdDisciplina(int idCurso) {
+        exibirDisciplinasResumo(idCurso);
         return lerInteiro("ID da disciplina: ");
     }
 
-    private static int lerIdTurma() {
+    private static int lerIdTurma(int idCurso, int idDisciplina) {
+        exibirTurmasResumo(idCurso, idDisciplina);
         return lerInteiro("ID da turma: ");
     }
 
@@ -203,12 +303,11 @@ public class Main {
     }
 
     private static void cadastrarCurso() {
-        int id = lerInteiro("ID do curso: ");
         String nome = lerLinha("Nome do curso: ");
         int carga = lerInteiro("Carga horária: ");
         double valor = lerDouble("Valor mensal (R$): ");
-        cursoService.cadastrar(id, nome, carga, valor);
-        System.out.println("Curso cadastrado com sucesso.");
+        Curso curso = cursoService.cadastrar(nome, carga, valor);
+        System.out.println("Curso cadastrado com sucesso. ID gerado: " + curso.getId());
     }
 
     private static void listarCursos() {
@@ -373,16 +472,15 @@ public class Main {
     }
 
     private static void cadastrarDisciplina(int idCurso) {
-        int idDisc = lerInteiro("ID da disciplina: ");
         String nome = lerLinha("Nome da disciplina: ");
         int carga = lerInteiro("Carga horária: ");
         String descricao = lerLinha("Descrição: ");
-        cursoService.adicionarDisciplina(idCurso, idDisc, nome, carga, descricao);
-        System.out.println("Disciplina cadastrada com sucesso.");
+        Disciplina disciplina = cursoService.adicionarDisciplina(idCurso, nome, carga, descricao);
+        System.out.println("Disciplina cadastrada com sucesso. ID gerado: " + disciplina.getId());
     }
 
     private static void atualizarDisciplina(int idCurso) {
-        int idDisc = lerInteiro("ID da disciplina: ");
+        int idDisc = lerIdDisciplina(idCurso);
     
         Disciplina disciplina = cursoService.buscarDisciplina(idCurso, idDisc);
     
@@ -424,18 +522,18 @@ public class Main {
     }
 
     private static void removerDisciplina(int idCurso) {
-        int idDisc = lerInteiro("ID da disciplina: ");
+        int idDisc = lerIdDisciplina(idCurso);
         cursoService.removerDisciplina(idCurso, idDisc);
     }
 
     private static void ativarDisciplina(int idCurso) {
-        int idDisc = lerInteiro("ID da disciplina: ");
+        int idDisc = lerIdDisciplina(idCurso);
         cursoService.ativarDisciplina(idCurso, idDisc);
         System.out.println("Disciplina ativada com sucesso.");
     }
 
     private static void desativarDisciplina(int idCurso) {
-        int idDisc = lerInteiro("ID da disciplina: ");
+        int idDisc = lerIdDisciplina(idCurso);
         cursoService.desativarDisciplina(idCurso, idDisc);
         System.out.println("Disciplina desativada com sucesso.");
     }
@@ -443,7 +541,7 @@ public class Main {
     private static void menuTurmasDisciplina() {
         tratarErro(() -> {
             int idCurso = lerIdCurso();
-            int idDisciplina = lerIdDisciplina();
+            int idDisciplina = lerIdDisciplina(idCurso);
             turmaService.listarTurmas(idCurso, idDisciplina);
             menuTurmasComIds(idCurso, idDisciplina);
         });
@@ -452,7 +550,7 @@ public class Main {
     private static void menuProfessoresAptos() {
         tratarErro(() -> {
             int idCurso = lerIdCurso();
-            int idDisciplina = lerIdDisciplina();
+            int idDisciplina = lerIdDisciplina(idCurso);
             int opcao;
             do {
                 System.out.println("\n--- Professores aptos (curso " + idCurso + ", disciplina " + idDisciplina + ") ---");
@@ -465,14 +563,14 @@ public class Main {
                 switch (opcao) {
                     case 1:
                         tratarErro(() -> turmaService.adicionarProfessorApto(
-                                idCurso, idDisciplina, lerInteiro("ID do professor: ")));
+                                idCurso, idDisciplina, lerIdProfessor()));
                         break;
                     case 2:
                         tratarErro(() -> turmaService.listarProfessoresAptos(idCurso, idDisciplina));
                         break;
                     case 3:
                         tratarErro(() -> turmaService.removerProfessorApto(
-                                idCurso, idDisciplina, lerInteiro("ID do professor: ")));
+                                idCurso, idDisciplina, lerIdProfessor()));
                         break;
                     case 0:
                         break;
@@ -568,33 +666,39 @@ public class Main {
         } while (opcao != 0);
     }
 
+    private static int lerIdProfessor() {
+        exibirProfessoresResumo();
+        return lerInteiro("ID do professor: ");
+    }
+
     private static void cadastrarTurma() {
         int idCurso = lerIdCurso();
-        int idDisciplina = lerIdDisciplina();
+        int idDisciplina = lerIdDisciplina(idCurso);
         cadastrarTurma(idCurso, idDisciplina);
     }
 
     private static void cadastrarTurma(int idCurso, int idDisciplina) {
-        int idTurma = lerIdTurma();
         String codigo = lerLinha("Código da turma: ");
         String turno = lerLinha("Turno: ");
         String sala = lerLinha("Sala: ");
-        turmaService.cadastrar(idCurso, idDisciplina, idTurma, codigo, turno, sala);
-        System.out.println("Turma cadastrada com sucesso.");
+        Turma turma = turmaService.cadastrar(idCurso, idDisciplina, codigo, turno, sala);
+        System.out.println("Turma cadastrada com sucesso. ID gerado: " + turma.getId());
     }
 
     private static void listarTurmas() {
-        turmaService.listarTurmas(lerIdCurso(), lerIdDisciplina());
+        int idCurso = lerIdCurso();
+        int idDisciplina = lerIdDisciplina(idCurso);
+        turmaService.listarTurmas(idCurso, idDisciplina);
     }
 
     private static void atualizarTurma() {
         int idCurso = lerIdCurso();
-        int idDisciplina = lerIdDisciplina();
+        int idDisciplina = lerIdDisciplina(idCurso);
         atualizarTurma(idCurso, idDisciplina);
     }
 
     private static void atualizarTurma(int idCurso, int idDisciplina) {
-        int idTurma = lerIdTurma();
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
     
         Turma turma = turmaService.buscarPorId(
                 idCurso,
@@ -633,29 +737,41 @@ public class Main {
 
     private static void removerTurma() {
         int idCurso = lerIdCurso();
-        int idDisciplina = lerIdDisciplina();
+        int idDisciplina = lerIdDisciplina(idCurso);
         removerTurma(idCurso, idDisciplina);
     }
 
     private static void removerTurma(int idCurso, int idDisciplina) {
-        turmaService.remover(idCurso, idDisciplina, lerIdTurma());
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
+        turmaService.remover(idCurso, idDisciplina, idTurma);
     }
 
     private static void definirProfessorTurma() {
-        turmaService.definirProfessor(
-                lerIdCurso(), lerIdDisciplina(), lerIdTurma(), lerInteiro("ID do professor: "));
+        int idCurso = lerIdCurso();
+        int idDisciplina = lerIdDisciplina(idCurso);
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
+        turmaService.definirProfessor(idCurso, idDisciplina, idTurma, lerIdProfessor());
     }
 
     private static void listarAlunosTurma() {
-        turmaService.listarAlunos(lerIdCurso(), lerIdDisciplina(), lerIdTurma());
+        int idCurso = lerIdCurso();
+        int idDisciplina = lerIdDisciplina(idCurso);
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
+        turmaService.listarAlunos(idCurso, idDisciplina, idTurma);
     }
 
     private static void ativarTurma() {
-        turmaService.ativar(lerIdCurso(), lerIdDisciplina(), lerIdTurma());
+        int idCurso = lerIdCurso();
+        int idDisciplina = lerIdDisciplina(idCurso);
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
+        turmaService.ativar(idCurso, idDisciplina, idTurma);
     }
 
     private static void desativarTurma() {
-        turmaService.desativar(lerIdCurso(), lerIdDisciplina(), lerIdTurma());
+        int idCurso = lerIdCurso();
+        int idDisciplina = lerIdDisciplina(idCurso);
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
+        turmaService.desativar(idCurso, idDisciplina, idTurma);
     }
 
     private static void menuAlunos() {
@@ -700,14 +816,13 @@ public class Main {
     }
 
     private static void cadastrarAluno() {
-        int id = lerInteiro("ID do aluno: ");
         String nome = lerLinha("Nome: ");
         String email = lerLinha("E-mail: ");
         String cpf = lerLinha("CPF: ");
         String dataNasc = lerLinha("Data de nascimento: ");
         String matricula = lerLinha("Matrícula: ");
-        alunoService.cadastrar(id, nome, email, cpf, dataNasc, matricula);
-        System.out.println("Aluno cadastrado com sucesso.");
+        Aluno aluno = alunoService.cadastrar(nome, email, cpf, dataNasc, matricula);
+        System.out.println("Aluno cadastrado com sucesso. ID gerado: " + aluno.getId());
     }
 
     private static void listarAlunos() {
@@ -817,14 +932,13 @@ public class Main {
     }
 
     private static void cadastrarProfessor() {
-        int id = lerInteiro("ID do professor: ");
         String nome = lerLinha("Nome: ");
         String email = lerLinha("E-mail: ");
         String cpf = lerLinha("CPF: ");
         String dataNasc = lerLinha("Data de nascimento: ");
         String especialidade = lerLinha("Especialidade: ");
-        professorService.cadastrar(id, nome, email, cpf, dataNasc, especialidade);
-        System.out.println("Professor cadastrado com sucesso.");
+        Professor professor = professorService.cadastrar(nome, email, cpf, dataNasc, especialidade);
+        System.out.println("Professor cadastrado com sucesso. ID gerado: " + professor.getId());
     }
 
     private static void listarProfessores() {
@@ -929,25 +1043,29 @@ public class Main {
     }
 
     private static void realizarMatricula() {
-        Matricula matricula = matriculaService.realizar(
-                lerInteiro("ID do aluno: "),
-                lerIdCurso(),
-                lerIdDisciplina(),
-                lerIdTurma());
-        System.out.println("Matrícula realizada com sucesso. ID: " + matricula.getId());
+        exibirAlunosResumo();
+        int idAluno = lerInteiro("ID do aluno: ");
+        int idCurso = lerIdCurso();
+        int idDisciplina = lerIdDisciplina(idCurso);
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
+        Matricula matricula = matriculaService.realizar(idAluno, idCurso, idDisciplina, idTurma);
+        System.out.println("Matrícula realizada com sucesso. ID gerado: " + matricula.getId());
     }
 
     private static void confirmarMatricula() {
+        exibirMatriculasResumo();
         matriculaService.confirmar(lerInteiro("ID da matrícula: "));
         System.out.println("Matrícula confirmada com sucesso.");
     }
 
     private static void cancelarMatricula() {
+        exibirMatriculasResumo();
         matriculaService.cancelar(lerInteiro("ID da matrícula: "));
         System.out.println("Matrícula cancelada com sucesso.");
     }
 
     private static void consultarMatricula() {
+        exibirMatriculasResumo();
         Matricula matricula = matriculaService.buscarPorId(lerInteiro("ID da matrícula: "));
         System.out.println(matricula);
     }
@@ -982,11 +1100,15 @@ public class Main {
     }
 
     private static void lancarNota() {
+        exibirMatriculasResumo();
         notaService.lancar(lerInteiro("ID da matrícula: "), lerDouble("Nota (0 a 10): "));
         System.out.println("Nota lançada com sucesso.");
     }
 
     private static void listarNotasTurma() {
-        notaService.listarPorTurma(lerIdCurso(), lerIdDisciplina(), lerIdTurma());
+        int idCurso = lerIdCurso();
+        int idDisciplina = lerIdDisciplina(idCurso);
+        int idTurma = lerIdTurma(idCurso, idDisciplina);
+        notaService.listarPorTurma(idCurso, idDisciplina, idTurma);
     }
 }

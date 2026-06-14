@@ -13,17 +13,17 @@ public class AlunoService {
         this.repository = repository;
     }
 
-    public void cadastrar(int id, String nome, String email, String cpf,
+    public Aluno cadastrar(String nome, String email, String cpf,
                           String dataNascimento, String matricula) {
         Validador.validarNome(nome);
         Validador.validarTextoObrigatorio(matricula, "Matrícula");
-        if (repository.buscarPorId(id).isPresent()) {
-            throw new IllegalArgumentException("Já existe aluno com o ID " + id + ".");
-        }
         if (repository.buscarPorMatricula(matricula).isPresent()) {
             throw new IllegalArgumentException("Já existe aluno com a matrícula " + matricula + ".");
         }
-        repository.salvar(new Aluno(id, nome, email, cpf, dataNascimento, matricula));
+        int id = repository.gerarId();
+        Aluno aluno = new Aluno(id, nome, email, cpf, dataNascimento, matricula);
+        repository.salvar(aluno);
+        return aluno;
     }
 
     public List<Aluno> listar() {

@@ -8,12 +8,17 @@ import java.util.List;
 public class CursoService {
 
     private final CursoRepository repository;
+    private int proximoIdDisciplina = 1;
 
     public CursoService(CursoRepository repository) {
         this.repository = repository;
     }
 
-    public void cadastrar(int id, String nome, int cargaHoraria, double valorMensal) {
+    public int gerarIdDisciplina() {
+        return proximoIdDisciplina++;
+    }
+
+    public Curso cadastrar(String nome, int cargaHoraria, double valorMensal) {
         validarNome(nome);
         if (cargaHoraria <= 0) {
             throw new IllegalArgumentException("Carga horária deve ser maior que zero.");
@@ -21,10 +26,10 @@ public class CursoService {
         if (valorMensal < 0) {
             throw new IllegalArgumentException("Valor mensal não pode ser negativo.");
         }
-        if (repository.buscarPorId(id).isPresent()) {
-            throw new IllegalArgumentException("Já existe curso com o ID " + id + ".");
-        }
-        repository.salvar(new Curso(id, nome, cargaHoraria, valorMensal, true));
+        int id = repository.gerarId();
+        Curso curso = new Curso(id, nome, cargaHoraria, valorMensal, true);
+        repository.salvar(curso);
+        return curso;
     }
 
     public List<Curso> listar() {
@@ -56,7 +61,7 @@ public class CursoService {
         }
     }
 
-    public void adicionarDisciplina(int idCurso, int idDisciplina, String nome,
+    public Disciplina adicionarDisciplina(int idCurso, String nome,
             int cargaHoraria, String descricao) {
         validarNome(nome);
         if (cargaHoraria <= 0) {
@@ -66,10 +71,9 @@ public class CursoService {
         if (!curso.isAtivo()) {
             throw new IllegalArgumentException("Não é possível adicionar disciplina em curso inativo.");
         }
-        if (curso.possuiDisciplinaComId(idDisciplina)) {
-            throw new IllegalArgumentException("Já existe disciplina com o ID " + idDisciplina + " neste curso.");
-        }
+        int idDisciplina = gerarIdDisciplina();
         curso.adicionarDisciplina(idDisciplina, nome, cargaHoraria, descricao, true);
+        return curso.buscarDisciplinaPorId(idDisciplina);
     }
 
     public void listarDisciplinas(int idCurso) {

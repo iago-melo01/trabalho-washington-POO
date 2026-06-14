@@ -32,7 +32,8 @@ public class MatriculaService {
         }
 
         try {
-            Matricula matricula = new Matricula(aluno, turma);
+            int id = matriculaRepository.gerarId();
+            Matricula matricula = new Matricula(id, aluno, turma);
             matriculaRepository.salvar(matricula);
             turma.adicionarMatricula(matricula);
             turma.adicionarAluno(aluno);
@@ -63,6 +64,10 @@ public class MatriculaService {
     public Matricula buscarPorId(int id) {
         return matriculaRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Matrícula não encontrada: ID " + id));
+    }
+
+    public List<Matricula> listar() {
+        return matriculaRepository.listar();
     }
 
     public List<Matricula> listarPorAluno(int idAluno) {

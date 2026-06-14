@@ -13,14 +13,14 @@ public class ProfessorService {
         this.repository = repository;
     }
 
-    public void cadastrar(int id, String nome, String email, String cpf,
+    public Professor cadastrar(String nome, String email, String cpf,
                           String dataNascimento, String especialidade) {
         Validador.validarNome(nome);
         Validador.validarTextoObrigatorio(especialidade, "Especialidade");
-        if (repository.buscarPorId(id).isPresent()) {
-            throw new IllegalArgumentException("Já existe professor com o ID " + id + ".");
-        }
-        repository.salvar(new Professor(id, nome, email, cpf, dataNascimento, especialidade));
+        int id = repository.gerarId();
+        Professor professor = new Professor(id, nome, email, cpf, dataNascimento, especialidade);
+        repository.salvar(professor);
+        return professor;
     }
 
     public List<Professor> listar() {

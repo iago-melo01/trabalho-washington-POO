@@ -12,25 +12,28 @@ public class TurmaService {
 
     private final CursoRepository cursoRepository;
     private final ProfessorRepository professorRepository;
+    private int proximoIdTurma = 1;
 
     public TurmaService(CursoRepository cursoRepository, ProfessorRepository professorRepository) {
         this.cursoRepository = cursoRepository;
         this.professorRepository = professorRepository;
     }
 
-    public void cadastrar(int idCurso, int idDisciplina, int idTurma,
+    public int gerarIdTurma() {
+        return proximoIdTurma++;
+    }
+
+    public Turma cadastrar(int idCurso, int idDisciplina,
                           String codigo, String turno, String sala) {
         Validador.validarTextoObrigatorio(codigo, "Código");
         Disciplina disciplina = buscarDisciplina(idCurso, idDisciplina);
         if (!disciplina.isAtivo()) {
             throw new IllegalArgumentException("Não é possível cadastrar turma em disciplina inativa.");
         }
-        for (Turma turma : disciplina.getTurmas()) {
-            if (turma.getId() == idTurma) {
-                throw new IllegalArgumentException("Já existe turma com o ID " + idTurma + " nesta disciplina.");
-            }
-        }
-        disciplina.adicionarTurma(new Turma(idTurma, codigo, turno, sala));
+        int idTurma = gerarIdTurma();
+        Turma turma = new Turma(idTurma, codigo, turno, sala);
+        disciplina.adicionarTurma(turma);
+        return turma;
     }
 
     public void listarTurmas(int idCurso, int idDisciplina) {
