@@ -1011,7 +1011,7 @@ public class Main {
         int opcao;
 
         do {
-            System.out.println("\n===== GERENCIAR MATRICULAS =====");
+            System.out.println("\n===== GERENCIAR MATRÍCULAS =====");
             System.out.println("1 - Realizar matrícula");
             System.out.println("2 - Confirmar matrícula");
             System.out.println("3 - Cancelar matrícula");
@@ -1075,7 +1075,7 @@ public class Main {
     private static void lancarNota() {
         int idProfessor = lerIdProfessor();
         exibirMatriculasResumo();
-        int idMatricula = lerInteiro("ID da matricula: ");
+        int idMatricula = lerInteiro("ID da matrícula: ");
         double nota = lerDouble("Nota (0 a 10): ");
 
         Professor professor = professorService.buscarPorId(idProfessor);
@@ -1091,7 +1091,7 @@ public class Main {
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        System.out.println("Nota lancada com sucesso.");
+        System.out.println("Nota lançada com sucesso.");
     }
 
     private static void listarNotasTurma() {
@@ -1107,7 +1107,7 @@ public class Main {
 
         List<Matricula> matriculas = professor.listarNotas(turma);
         if (matriculas.isEmpty()) {
-            System.out.println("Nenhuma matricula nesta turma.");
+            System.out.println("Nenhuma matrícula nesta turma.");
             return;
         }
 
@@ -1118,21 +1118,21 @@ public class Main {
 
     private static void validarProfessorResponsavel(Professor professor, Turma turma) {
         if (turma.getProfessor() == null) {
-            throw new IllegalArgumentException("A turma ainda nao possui professor definido.");
+            throw new IllegalArgumentException("A turma ainda não possui professor definido.");
         }
 
         if (turma.getProfessor().getId() != professor.getId()) {
-            throw new IllegalArgumentException("Este professor nao e responsavel por esta turma.");
+            throw new IllegalArgumentException("Este professor não é responsável por esta turma.");
         }
     }
 
     private static void validarMatriculaPodeReceberNota(Matricula matricula) {
         if (Matricula.STATUS_CANCELADA.equals(matricula.getStatus())) {
-            throw new IllegalArgumentException("Nao e possivel lancar nota em matricula cancelada.");
+            throw new IllegalArgumentException("Não é possível lançar nota em matrícula cancelada.");
         }
 
         if (!Matricula.STATUS_CONFIRMADA.equals(matricula.getStatus())) {
-            throw new IllegalArgumentException("Matricula precisa estar confirmada para lancar nota.");
+            throw new IllegalArgumentException("Matrícula precisa estar confirmada para lançar nota.");
         }
     }
 }

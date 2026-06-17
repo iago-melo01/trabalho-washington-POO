@@ -25,7 +25,7 @@ public class Professor extends Pessoa implements Avaliavel {
     @Override
     public void lancarNota(Matricula matricula, double nota) throws NotaInvalidaException {
         if (matricula == null) {
-            throw new NotaInvalidaException("Matricula nao pode ser nula.");
+            throw new NotaInvalidaException("Matrícula não pode ser nula.");
         }
         if (nota < 0 || nota > 10) {
             throw new NotaInvalidaException("Nota deve estar entre 0 e 10.");
@@ -37,7 +37,7 @@ public class Professor extends Pessoa implements Avaliavel {
     @Override
     public List<Matricula> listarNotas(Turma turma) {
         if (turma == null) {
-            throw new IllegalArgumentException("Turma nao pode ser nula.");
+            throw new IllegalArgumentException("Turma não pode ser nula.");
         }
 
         return turma.getMatriculas();
