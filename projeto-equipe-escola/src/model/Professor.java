@@ -1,6 +1,9 @@
 package model;
 
-public class Professor extends Pessoa {
+import exception.NotaInvalidaException;
+import java.util.List;
+
+public class Professor extends Pessoa implements Avaliavel {
 
     private String especialidade;
 
@@ -19,12 +22,25 @@ public class Professor extends Pessoa {
         this.especialidade = especialidade;
     }
 
-    public void lancarNota() {
-        System.out.println("Nota lançada.");
+    @Override
+    public void lancarNota(Matricula matricula, double nota) throws NotaInvalidaException {
+        if (matricula == null) {
+            throw new NotaInvalidaException("Matricula nao pode ser nula.");
+        }
+        if (nota < 0 || nota > 10) {
+            throw new NotaInvalidaException("Nota deve estar entre 0 e 10.");
+        }
+
+        matricula.setNotaFinal(nota);
     }
 
-    public void listarNotas() {
-        System.out.println("Listando notas...");
+    @Override
+    public List<Matricula> listarNotas(Turma turma) {
+        if (turma == null) {
+            throw new IllegalArgumentException("Turma nao pode ser nula.");
+        }
+
+        return turma.getMatriculas();
     }
 
     @Override

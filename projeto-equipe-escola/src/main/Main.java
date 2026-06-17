@@ -15,7 +15,6 @@ import repository.ProfessorRepository;
 import service.AlunoService;
 import service.CursoService;
 import service.MatriculaService;
-import service.NotaService;
 import service.ProfessorService;
 import service.TurmaService;
 
@@ -36,7 +35,6 @@ public class Main {
     private static final TurmaService turmaService = new TurmaService(cursoRepository, professorRepository);
     private static final MatriculaService matriculaService =
             new MatriculaService(alunoRepository, matriculaRepository, turmaService);
-    private static final NotaService notaService = new NotaService(matriculaService);
 
     private static Escola escola;
 
@@ -74,9 +72,6 @@ public class Main {
                     menuMatriculas();
                     break;
                 case 7:
-                    menuNotas();
-                    break;
-                case 8:
                     listarPessoasDoSistema();
                     break;
                 case 0:
@@ -99,8 +94,7 @@ public class Main {
         System.out.println("4 - Gerenciar alunos");
         System.out.println("5 - Gerenciar professores");
         System.out.println("6 - Gerenciar matrículas");
-        System.out.println("7 - Gerenciar notas");
-        System.out.println("8 - Listar pessoas do sistema");
+        System.out.println("7 - Listar pessoas do sistema");
         System.out.println("0 - Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -903,6 +897,8 @@ public class Main {
             System.out.println("2 - Listar professores");
             System.out.println("3 - Atualizar professor");
             System.out.println("4 - Remover professor");
+            System.out.println("5 - Lançar nota");
+            System.out.println("6 - Listar notas de uma turma");
             System.out.println("0 - Voltar");
             System.out.print("Escolha uma opção: ");
     
@@ -920,6 +916,12 @@ public class Main {
                     break;
                 case 4:
                     tratarErro(Main::removerProfessor);
+                    break;
+                case 5:
+                    tratarErro(Main::lancarNota);
+                    break;
+                case 6:
+                    tratarErro(Main::listarNotasTurma);
                     break;
                 case 0:
                     System.out.println("Voltando ao menu principal...");
@@ -1009,7 +1011,7 @@ public class Main {
         int opcao;
 
         do {
-            System.out.println("\n===== GERENCIAR MATRÍCULAS =====");
+            System.out.println("\n===== GERENCIAR MATRICULAS =====");
             System.out.println("1 - Realizar matrícula");
             System.out.println("2 - Confirmar matrícula");
             System.out.println("3 - Cancelar matrícula");
@@ -1070,45 +1072,67 @@ public class Main {
         System.out.println(matricula);
     }
 
-    private static void menuNotas() {
-        int opcao;
-
-        do {
-            System.out.println("\n===== GERENCIAR NOTAS =====");
-            System.out.println("1 - Lançar nota");
-            System.out.println("2 - Listar notas de uma turma");
-            System.out.println("0 - Voltar");
-            System.out.print("Escolha uma opção: ");
-
-            opcao = lerOpcao();
-
-            switch (opcao) {
-                case 1:
-                    tratarErro(Main::lancarNota);
-                    break;
-                case 2:
-                    tratarErro(Main::listarNotasTurma);
-                    break;
-                case 0:
-                    System.out.println("Voltando ao menu principal...");
-                    break;
-                default:
-                    System.out.println("Opção inválida.");
-            }
-
-        } while (opcao != 0);
-    }
-
     private static void lancarNota() {
+        int idProfessor = lerIdProfessor();
         exibirMatriculasResumo();
-        notaService.lancar(lerInteiro("ID da matrícula: "), lerDouble("Nota (0 a 10): "));
-        System.out.println("Nota lançada com sucesso.");
+        int idMatricula = lerInteiro("ID da matricula: ");
+        double nota = lerDouble("Nota (0 a 10): ");
+
+        Professor professor = professorService.buscarPorId(idProfessor);
+        Matricula matricula = matriculaService.buscarPorId(idMatricula);
+        Turma turma = matricula.getTurma();
+
+        validarProfessorResponsavel(professor, turma);
+        validarMatriculaPodeReceberNota(matricula);
+
+        try {
+            professor.lancarNota(matricula, nota);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        System.out.println("Nota lancada com sucesso.");
     }
 
     private static void listarNotasTurma() {
+        int idProfessor = lerIdProfessor();
         int idCurso = lerIdCurso();
         int idDisciplina = lerIdDisciplina(idCurso);
         int idTurma = lerIdTurma(idCurso, idDisciplina);
-        notaService.listarPorTurma(idCurso, idDisciplina, idTurma);
+
+        Professor professor = professorService.buscarPorId(idProfessor);
+        Turma turma = turmaService.buscarPorId(idCurso, idDisciplina, idTurma);
+
+        validarProfessorResponsavel(professor, turma);
+
+        List<Matricula> matriculas = professor.listarNotas(turma);
+        if (matriculas.isEmpty()) {
+            System.out.println("Nenhuma matricula nesta turma.");
+            return;
+        }
+
+        for (Matricula matricula : matriculas) {
+            System.out.println(matricula);
+        }
+    }
+
+    private static void validarProfessorResponsavel(Professor professor, Turma turma) {
+        if (turma.getProfessor() == null) {
+            throw new IllegalArgumentException("A turma ainda nao possui professor definido.");
+        }
+
+        if (turma.getProfessor().getId() != professor.getId()) {
+            throw new IllegalArgumentException("Este professor nao e responsavel por esta turma.");
+        }
+    }
+
+    private static void validarMatriculaPodeReceberNota(Matricula matricula) {
+        if (Matricula.STATUS_CANCELADA.equals(matricula.getStatus())) {
+            throw new IllegalArgumentException("Nao e possivel lancar nota em matricula cancelada.");
+        }
+
+        if (!Matricula.STATUS_CONFIRMADA.equals(matricula.getStatus())) {
+            throw new IllegalArgumentException("Matricula precisa estar confirmada para lancar nota.");
+        }
     }
 }
